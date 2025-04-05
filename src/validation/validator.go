@@ -17,7 +17,7 @@ func MakeValidationError(err error) *[]Validationerror {
 	var ve validator.ValidationErrors
 	if errors.As(err, &ve) {
 		for _, err := range err.(validator.ValidationErrors) {
-			element := Validationerror{}
+			var element Validationerror
 			element.Property = err.Field()
 			element.Tag = err.Tag()
 			element.Value = err.Param()

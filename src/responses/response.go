@@ -3,11 +3,11 @@ package responses
 import "store/src/validation"
 
 type Response struct {
-	Status        bool                         `json:"Status"`
-	StatusCode    int                          `json:"StatusCode"`
-	Response      any                          `json:"Response,omitempty"`
+	Status        bool                          `json:"Status"`
+	StatusCode    int                           `json:"StatusCode"`
+	Response      any                           `json:"Response,omitempty"`
 	Err           string                        `json:"Error,omitempty"`
-	Validationerr []validation.Validationerror `json:"ValidationError,omitempty"`
+	Validationerr *[]validation.Validationerror `json:"ValidationError,omitempty"`
 }
 
 func MakeNormalResponse(status bool, statusCode int, response any) *Response {
@@ -30,6 +30,6 @@ func MakeResponseWithValidationError(status bool, statusCode int, err error) *Re
 	return &Response{
 		Status:        status,
 		StatusCode:    statusCode,
-		Validationerr: *validation.MakeValidationError(err),
+		Validationerr: validation.MakeValidationError(err),
 	}
 }
