@@ -17,7 +17,6 @@ type StoreConfig struct {
 }
 
 type Product struct {
-	Amount int
 	Price float64
 	Currency string
 }

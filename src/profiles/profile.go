@@ -5,6 +5,14 @@ type Profile struct {
 	Password string  `json:"password"`
 	Fullname string  `json:"fullname"`
 	Wallet   float64 `json:"wallet"`
+	Basket 	 Clothe
+}
+
+type Clothe struct {
+	Hat int
+	Shoes int
+	Pant int
+	Shirt int
 }
 
 var Profiles []Profile

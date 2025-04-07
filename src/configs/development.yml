@@ -2,18 +2,14 @@ Server:
   Port: 5555
 Store:
   Hat:
-    Amount: 5
     Price: 200.00
     Currency: USD
   Shoes:
-    Amount: 7
     Price: 450.00
     Currency: USD
   Pant:
-    Amount: 13
     Price: 325.00
     Currency: USD
   Shirt:
-    Amount: 6
     Price: 500.00
     Currency: USD
