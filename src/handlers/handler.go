@@ -6,7 +6,6 @@ import (
 	"store/src/configs"
 	"store/src/profiles"
 	"store/src/responses"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -100,8 +99,8 @@ func (h Helper) ProfileNew(c *gin.Context) {
 }
 
 type ProfileSeeAccess struct {
-	ID       string `json:"id"`
-	Password string `json:"password"`
+	ID       string `json:"id" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 // @Summary watch profile
@@ -128,8 +127,8 @@ func (h Helper) ProfileSee(c *gin.Context) {
 }
 
 type ProfileChargeWalletAccess struct {
-	ID     string `json:"id"`
-	Amount string `json:"amount"`
+	ID     string  `json:"id" binding:"required"`
+	Amount float64 `json:"amount" binding:"required,numeric"`
 }
 
 // @Summary charge wallet
@@ -141,22 +140,20 @@ type ProfileChargeWalletAccess struct {
 // @Router /profile/charge/wallet [post]
 func (h Helper) ProfileChargeWallet(c *gin.Context) {
 	p := ProfileChargeWalletAccess{}
-	c.ShouldBindJSON(&p)
-	amount1, err := strconv.ParseFloat(p.Amount, 64)
+	err := c.ShouldBindJSON(&p)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, responses.MakeResponseWithError(false, http.StatusBadRequest, fmt.Errorf("invalid amount for charging")))
+		c.AbortWithStatusJSON(http.StatusBadRequest, responses.MakeResponseWithValidationError(false, http.StatusBadRequest, err))
 		return
 	}
 	for i := range profiles.Profiles {
 		if p.ID == profiles.Profiles[i].ID {
-			profiles.Profiles[i].Wallet += amount1
+			profiles.Profiles[i].Wallet += p.Amount
 			c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "charged successfully"))
 			return
 		}
 	}
 	c.AbortWithStatusJSON(http.StatusBadGateway, responses.MakeResponseWithError(false, http.StatusBadGateway, fmt.Errorf("this id doesnt exist")))
 }
-
 
 // @Summary watch profiles
 // @Description watch all of profiles
@@ -178,10 +175,10 @@ func contains(slice []string, value string) bool {
 }
 
 type BuyClotheAccess struct {
-	ID       string `json:"id"`
-	Password string `json:"password"`
-	Target   string `json:"target"`
-	Amount   string `json:"amount"`
+	ID       string `json:"id" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Target   string `json:"target" binding:"required"`
+	Amount   int    `json:"amount" binding:"required,numeric"`
 }
 
 // @Summary buy clothe
@@ -193,10 +190,9 @@ type BuyClotheAccess struct {
 // @Router /clothes/buy [post]
 func (h Helper) BuyClothe(c *gin.Context) {
 	p := BuyClotheAccess{}
-	c.ShouldBindJSON(&p)
-	amount, err := strconv.Atoi(p.Amount)
+	err := c.ShouldBindJSON(&p)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("invalid amount")))
+		c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithValidationError(false, http.StatusLocked, err))
 		return
 	}
 	for x := range profiles.Profiles {
@@ -211,65 +207,63 @@ func (h Helper) BuyClothe(c *gin.Context) {
 				}
 				switch p.Target {
 				case "hat":
-					all_price := configs.GetConfig().Store.Hat.Price * float64(amount)
-					fmt.Println(profiles.Profiles[x].Wallet)
-					fmt.Println(all_price)
+					all_price := configs.GetConfig().Store.Hat.Price * float64(p.Amount)
 					if all_price > profiles.Profiles[x].Wallet {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("money is not enoght")))
 						return
 					}
-					if Amounts["Hat"] <= 0 {
+					if Amounts["Hat"] < p.Amount {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("hat is over")))
 						return
 					}
-					Amounts["Hat"] = Amounts["Hat"] - amount
+					Amounts["Hat"] = Amounts["Hat"] - p.Amount
 					profiles.Profiles[x].Wallet -= all_price
-					profiles.Profiles[x].Basket.Hat += amount
+					profiles.Profiles[x].Basket.Hat += p.Amount
 					c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "bought successfuly"))
 					return
 				case "shoes":
-					all_price := configs.GetConfig().Store.Shoes.Price * float64(amount)
+					all_price := configs.GetConfig().Store.Shoes.Price * float64(p.Amount)
 					if all_price > profiles.Profiles[x].Wallet {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("money is not enoght")))
 						return
 					}
-					if Amounts["Shoes"] <= 0 {
+					if Amounts["Shoes"] <= p.Amount {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("shoes is over")))
 						return
 					}
-					Amounts["Shoes"] = Amounts["Shoes"] - amount
+					Amounts["Shoes"] = Amounts["Shoes"] - p.Amount
 					profiles.Profiles[x].Wallet -= all_price
-					profiles.Profiles[x].Basket.Shoes += amount
+					profiles.Profiles[x].Basket.Shoes += p.Amount
 					c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "bought successfuly"))
 					return
 				case "pant":
-					all_price := configs.GetConfig().Store.Pant.Price * float64(amount)
+					all_price := configs.GetConfig().Store.Pant.Price * float64(p.Amount)
 					if all_price > profiles.Profiles[x].Wallet {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("money is not enoght")))
 						return
 					}
-					if Amounts["Pant"] <= 0 {
+					if Amounts["Pant"] <= p.Amount {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("pant is over")))
 						return
 					}
-					Amounts["Pant"] = Amounts["Pant"] - amount
+					Amounts["Pant"] = Amounts["Pant"] - p.Amount
 					profiles.Profiles[x].Wallet -= all_price
-					profiles.Profiles[x].Basket.Pant += amount
+					profiles.Profiles[x].Basket.Pant += p.Amount
 					c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "bought successfuly"))
 					return
 				case "shirt":
-					all_price := configs.GetConfig().Store.Shirt.Price * float64(amount)
+					all_price := configs.GetConfig().Store.Shirt.Price * float64(p.Amount)
 					if all_price > profiles.Profiles[x].Wallet {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("money is not enoght")))
 						return
 					}
-					if Amounts["Shirt"] <= 0 {
+					if Amounts["Shirt"] <= p.Amount {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("shirt is over")))
 						return
 					}
-					Amounts["Shirt"] = Amounts["Shirt"] - amount
+					Amounts["Shirt"] = Amounts["Shirt"] - p.Amount
 					profiles.Profiles[x].Wallet -= all_price
-					profiles.Profiles[x].Basket.Shirt += amount
+					profiles.Profiles[x].Basket.Shirt += p.Amount
 					c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "bought successfuly"))
 					return
 				}
