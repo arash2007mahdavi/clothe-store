@@ -13,38 +13,50 @@ import (
 )
 
 var Amounts = map[string]int{
-	"Hat": 10,
+	"Hat":   10,
 	"Shoes": 10,
-	"Pant": 10,
+	"Pant":  10,
 	"Shirt": 10,
 }
 
 type Helper struct {
 }
 
+// @Summary welcome to store
+// @Description this welcome message is for testing api
+// @Tags Welcome
+// @Produce json
+// @Success 200 {object} responses.Response "Success"
+// @Router / [get]
 func (h Helper) MainStore(c *gin.Context) {
 	c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "Welcome To Store"))
 }
 
 type Thing struct {
-	Amount int
-	Price float64
+	Amount   int
+	Price    float64
 	Currency string
 }
 
 type Things struct {
-	Hat Thing
+	Hat   Thing
 	Shoes Thing
-	Pant Thing
+	Pant  Thing
 	Shirt Thing
 }
 
+// @Summary get clothes
+// @Description get clothes information (price and amount)
+// @Tags Clothes
+// @Produce json
+// @Success 200 {object} responses.Response "Success"
+// @Router /clothes [get]
 func (h Helper) GetClothes(c *gin.Context) {
 	cfg := configs.GetConfig()
 	things := Things{
-		Hat: Thing{Amount: Amounts["Hat"], Price: cfg.Store.Hat.Price, Currency: cfg.Store.Hat.Currency},
+		Hat:   Thing{Amount: Amounts["Hat"], Price: cfg.Store.Hat.Price, Currency: cfg.Store.Hat.Currency},
 		Shoes: Thing{Amount: Amounts["Shoes"], Price: cfg.Store.Shoes.Price, Currency: cfg.Store.Shoes.Currency},
-		Pant: Thing{Amount: Amounts["Pant"], Price: cfg.Store.Pant.Price, Currency: cfg.Store.Pant.Currency},
+		Pant:  Thing{Amount: Amounts["Pant"], Price: cfg.Store.Pant.Price, Currency: cfg.Store.Pant.Currency},
 		Shirt: Thing{Amount: Amounts["Shirt"], Price: cfg.Store.Shirt.Price, Currency: cfg.Store.Shirt.Currency},
 	}
 	c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, things))
@@ -56,6 +68,13 @@ type GetProfile struct {
 	Fullname string `json:"fullname" binding:"required,min=10,max=25"`
 }
 
+// @Summary create new profile
+// @Description create new profile
+// @Tags Profile
+// @Accept json
+// @Produce json
+// @Success 200 {object} responses.Response "Success"
+// @Router /profile/new [post]
 func (h Helper) ProfileNew(c *gin.Context) {
 	new := GetProfile{}
 	err := c.ShouldBindJSON(&new)
@@ -74,18 +93,30 @@ func (h Helper) ProfileNew(c *gin.Context) {
 		Password: new.Password,
 		Fullname: new.Fullname,
 		Wallet:   0.0,
-		Basket: profiles.Clothe{Hat: 0, Shoes: 0, Pant: 0, Shirt: 0},
+		Basket:   profiles.Clothe{Hat: 0, Shoes: 0, Pant: 0, Shirt: 0},
 	}
 	profiles.AddProfile(new2)
 	c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "new profile created"))
 }
 
+type ProfileSeeAccess struct {
+	ID       string `json:"id"`
+	Password string `json:"password"`
+}
+
+// @Summary watch profile
+// @Description watch your profile
+// @Tags Profile
+// @Accept json
+// @Produce json
+// @Success 200 {object} responses.Response "Success"
+// @Router /profile/see [get]
 func (h Helper) ProfileSee(c *gin.Context) {
-	id := c.Query("id")
+	p := ProfileSeeAccess{}
+	c.ShouldBindJSON(&p)
 	for _, prof := range profiles.Profiles {
-		if prof.ID == id {
-			password := c.Query("password")
-			if prof.Password == password {
+		if prof.ID == p.ID {
+			if prof.Password == p.Password {
 				c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, prof))
 				return
 			}
@@ -96,16 +127,28 @@ func (h Helper) ProfileSee(c *gin.Context) {
 	c.AbortWithStatusJSON(http.StatusBadGateway, responses.MakeResponseWithError(false, http.StatusBadGateway, fmt.Errorf("this id doesnt exist")))
 }
 
+type ProfileChargeWalletAccess struct {
+	ID     string `json:"id"`
+	Amount string `json:"amount"`
+}
+
+// @Summary charge wallet
+// @Description charge wallet
+// @Tags Profile
+// @Accept json
+// @Produce json
+// @Success 200 {object} responses.Response "Success"
+// @Router /profile/charge/wallet [post]
 func (h Helper) ProfileChargeWallet(c *gin.Context) {
-	amount := c.Query("amount")
-	amount1, err := strconv.ParseFloat(amount, 64)
+	p := ProfileChargeWalletAccess{}
+	c.ShouldBindJSON(&p)
+	amount1, err := strconv.ParseFloat(p.Amount, 64)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, responses.MakeResponseWithError(false, http.StatusBadRequest, fmt.Errorf("invalid amount for charging")))
 		return
 	}
-	id := c.Query("id")
 	for i := range profiles.Profiles {
-		if id == profiles.Profiles[i].ID {
+		if p.ID == profiles.Profiles[i].ID {
 			profiles.Profiles[i].Wallet += amount1
 			c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "charged successfully"))
 			return
@@ -114,6 +157,13 @@ func (h Helper) ProfileChargeWallet(c *gin.Context) {
 	c.AbortWithStatusJSON(http.StatusBadGateway, responses.MakeResponseWithError(false, http.StatusBadGateway, fmt.Errorf("this id doesnt exist")))
 }
 
+
+// @Summary watch profiles
+// @Description watch all of profiles
+// @Tags Profile
+// @Produce json
+// @Success 200 {object} responses.Response "Success"
+// @Router /profile/see/all [get]
 func (h Helper) ProfileSeeAll(c *gin.Context) {
 	c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, profiles.Profiles))
 }
@@ -127,27 +177,39 @@ func contains(slice []string, value string) bool {
 	return false
 }
 
+type BuyClotheAccess struct {
+	ID       string `json:"id"`
+	Password string `json:"password"`
+	Target   string `json:"target"`
+	Amount   string `json:"amount"`
+}
+
+// @Summary buy clothe
+// @Description buy clothe
+// @Tags Clothes
+// @Accept json
+// @Produce json
+// @Success 200 {object} responses.Response "Success"
+// @Router /clothes/buy [post]
 func (h Helper) BuyClothe(c *gin.Context) {
-	id := c.Query("id")
-	password := c.Query("password")
-	target := c.Query("target")
-	amountStr := c.Query("amount")
-	amount, err := strconv.Atoi(amountStr)
+	p := BuyClotheAccess{}
+	c.ShouldBindJSON(&p)
+	amount, err := strconv.Atoi(p.Amount)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("invalid amount")))
 		return
 	}
 	for x := range profiles.Profiles {
-		if id == profiles.Profiles[x].ID {
-			if password == profiles.Profiles[x].Password {
+		if p.ID == profiles.Profiles[x].ID {
+			if p.Password == profiles.Profiles[x].Password {
 				targets := []string{"hat", "shoes", "pant", "shirt"}
-				target = strings.ToLower(target)
-				ok := contains(targets, target)
+				p.Target = strings.ToLower(p.Target)
+				ok := contains(targets, p.Target)
 				if !ok {
 					c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("invalid target")))
 					return
 				}
-				switch target {
+				switch p.Target {
 				case "hat":
 					all_price := configs.GetConfig().Store.Hat.Price * float64(amount)
 					fmt.Println(profiles.Profiles[x].Wallet)
@@ -160,7 +222,7 @@ func (h Helper) BuyClothe(c *gin.Context) {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("hat is over")))
 						return
 					}
-					Amounts["Hat"] = Amounts["Hat"]-amount
+					Amounts["Hat"] = Amounts["Hat"] - amount
 					profiles.Profiles[x].Wallet -= all_price
 					profiles.Profiles[x].Basket.Hat += amount
 					c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "bought successfuly"))
@@ -175,7 +237,7 @@ func (h Helper) BuyClothe(c *gin.Context) {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("shoes is over")))
 						return
 					}
-					Amounts["Shoes"] = Amounts["Shoes"]-amount
+					Amounts["Shoes"] = Amounts["Shoes"] - amount
 					profiles.Profiles[x].Wallet -= all_price
 					profiles.Profiles[x].Basket.Shoes += amount
 					c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "bought successfuly"))
@@ -190,7 +252,7 @@ func (h Helper) BuyClothe(c *gin.Context) {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("pant is over")))
 						return
 					}
-					Amounts["Pant"] = Amounts["Pant"]-amount
+					Amounts["Pant"] = Amounts["Pant"] - amount
 					profiles.Profiles[x].Wallet -= all_price
 					profiles.Profiles[x].Basket.Pant += amount
 					c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "bought successfuly"))
@@ -205,7 +267,7 @@ func (h Helper) BuyClothe(c *gin.Context) {
 						c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("shirt is over")))
 						return
 					}
-					Amounts["Shirt"] = Amounts["Shirt"]-amount
+					Amounts["Shirt"] = Amounts["Shirt"] - amount
 					profiles.Profiles[x].Wallet -= all_price
 					profiles.Profiles[x].Basket.Shirt += amount
 					c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "bought successfuly"))

@@ -1,0 +1,127 @@
+definitions:
+  responses.Response:
+    properties:
+      Error:
+        type: string
+      Response: {}
+      Status:
+        type: boolean
+      StatusCode:
+        type: integer
+      ValidationError:
+        items:
+          $ref: '#/definitions/validation.Validationerror'
+        type: array
+    type: object
+  validation.Validationerror:
+    properties:
+      property:
+        type: string
+      tag:
+        type: string
+      value:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /:
+    get:
+      description: this welcome message is for testing api
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: welcome to store
+      tags:
+      - Welcome
+  /clothes:
+    get:
+      description: get clothes information (price and amount)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: get clothes
+      tags:
+      - Clothes
+  /clothes/buy:
+    post:
+      consumes:
+      - application/json
+      description: buy clothe
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: buy clothe
+      tags:
+      - Clothes
+  /profile/charge/wallet:
+    post:
+      consumes:
+      - application/json
+      description: charge wallet
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: charge wallet
+      tags:
+      - Profile
+  /profile/new:
+    post:
+      consumes:
+      - application/json
+      description: create new profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: create new profile
+      tags:
+      - Profile
+  /profile/see:
+    get:
+      consumes:
+      - application/json
+      description: watch your profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: watch profile
+      tags:
+      - Profile
+  /profile/see/all:
+    get:
+      description: watch all of profiles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/responses.Response'
+      summary: watch profiles
+      tags:
+      - Profile
+swagger: "2.0"

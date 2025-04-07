@@ -9,19 +9,19 @@ import (
 
 func Store(router *gin.RouterGroup) {
 	helper := handlers.Helper{}
-	router.GET("/", helper.MainStore)
+	router.GET("/", middlewares.CheckApiKey, helper.MainStore)
 	
 	profile := router.Group("/profile")
 	{
-		profile.POST("/new", helper.ProfileNew)
-		profile.GET("/see", helper.ProfileSee)
-		profile.GET("/see/all", middlewares.CheckAdmin, helper.ProfileSeeAll)
-		profile.POST("/charge/wallet", helper.ProfileChargeWallet)
+		profile.POST("/new", middlewares.CheckApiKey, helper.ProfileNew)
+		profile.GET("/see", middlewares.CheckApiKey, helper.ProfileSee)
+		profile.GET("/see/all", middlewares.CheckApiKey, middlewares.CheckAdmin, helper.ProfileSeeAll)
+		profile.POST("/charge/wallet", middlewares.CheckApiKey, helper.ProfileChargeWallet)
 	}
 
 	clothes := router.Group("/clothes")
 	{
-		clothes.GET("/", helper.GetClothes)
-		clothes.POST("/buy", helper.BuyClothe)
+		clothes.GET("/", middlewares.CheckApiKey, helper.GetClothes)
+		clothes.POST("/buy", middlewares.CheckApiKey, helper.BuyClothe)
 	}
 }
