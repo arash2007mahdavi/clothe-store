@@ -1,8 +1,9 @@
 package configs
 
 type Config struct {
-	Server ServerConfig
-	Store StoreConfig
+	Server  ServerConfig
+	Store   StoreConfig
+	Logging LoggingConfig
 }
 
 type ServerConfig struct {
@@ -10,13 +11,19 @@ type ServerConfig struct {
 }
 
 type StoreConfig struct {
-	Hat Product
+	Hat   Product
 	Shoes Product
-	Pant Product
+	Pant  Product
 	Shirt Product
 }
 
+type LoggingConfig struct {
+	Path     string
+	LogLevel string
+	Logger   string
+}
+
 type Product struct {
-	Price float64
+	Price    float64
 	Currency string
 }

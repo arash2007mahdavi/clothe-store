@@ -13,3 +13,7 @@ Store:
   Shirt:
     Price: 500.00
     Currency: USD
+Logging:
+  Path: ../logs/logs.log
+  LogLevel: debug
+  Logger: zerologger

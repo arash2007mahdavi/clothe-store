@@ -9,7 +9,7 @@ import (
 
 func Store(router *gin.RouterGroup) {
 	helper := handlers.Helper{}
-	router.GET("/", middlewares.CheckApiKey, helper.MainStore)
+	router.GET("/", helper.MainStore)
 	
 	profile := router.Group("/profile")
 	{
