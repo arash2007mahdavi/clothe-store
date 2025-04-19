@@ -17,3 +17,21 @@ Logging:
   Path: ../logs/logs.log
   LogLevel: debug
   Logger: zerologger
+Postgres:
+  Host: localhost
+  Port: 5432
+  User: arash2007mahdavi
+  Password: arash2007
+  DbName: store_database
+  SslMode: disable
+  MaxIdleConns: 5
+  MaxOpenConns: 100
+  ConnMaxLifetime: 5
+Otp:
+  Expire: 120
+  Digit: 6
+Jwt:
+  Secret: "mySecretKey"
+  RefreshSecret: "mySecretKey"
+  AccessTokenExpireDuration: 60
+  RefreshTokenExpireDuration: 60

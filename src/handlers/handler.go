@@ -3,9 +3,11 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"store/src/commons"
 	"store/src/configs"
 	"store/src/profiles"
 	"store/src/responses"
+	"store/src/services"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -66,7 +68,7 @@ type GetProfile struct {
 	Password string `json:"password" binding:"required,password"`
 	Fullname string `json:"fullname" binding:"required,min=10,max=25"`
 }
-
+var otpService = services.NewOtpService(configs.GetConfig())
 // @Summary create new profile
 // @Description create new profile
 // @Tags Profile
@@ -94,8 +96,35 @@ func (h Helper) ProfileNew(c *gin.Context) {
 		Wallet:   0.0,
 		Basket:   profiles.Clothe{Hat: 0, Shoes: 0, Pant: 0, Shirt: 0},
 	}
+	otp := commons.MakeOtp()
+	fmt.Println("otp:", otp)
+	err = otpService.SetOtp("09945092968", otp)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadGateway, responses.MakeResponseWithError(false, http.StatusBadGateway, err))
+		return
+	}
 	profiles.AddProfile(new2)
-	c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "new profile created"))
+	c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "otp send to you"))
+}
+
+type GetOtp struct {
+	MobileNumber string `json:"mobileNumber" binding:"required"`
+	Otp          string `json:"otp" binding:"required"`
+}
+
+func (h Helper) CheckOtp(c *gin.Context) {
+	getotp := &GetOtp{}
+	err := c.ShouldBindJSON(&getotp)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadGateway, responses.MakeResponseWithValidationError(false, http.StatusBadGateway, err))
+		return
+	}
+	err = otpService.ValidateOtp(getotp.MobileNumber, getotp.Otp)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadGateway, responses.MakeResponseWithError(false, http.StatusBadGateway, err))
+		return
+	}
+	c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, "correct otp"))
 }
 
 type ProfileSeeAccess struct {

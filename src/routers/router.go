@@ -14,6 +14,7 @@ func Store(router *gin.RouterGroup) {
 	profile := router.Group("/profile")
 	{
 		profile.POST("/new", middlewares.CheckApiKey, helper.ProfileNew)
+		profile.POST("/otp", middlewares.CheckApiKey, helper.CheckOtp)
 		profile.GET("/see", middlewares.CheckApiKey, helper.ProfileSee)
 		profile.GET("/see/all", middlewares.CheckApiKey, middlewares.CheckAdmin, helper.ProfileSeeAll)
 		profile.POST("/charge/wallet", middlewares.CheckApiKey, helper.ProfileChargeWallet)

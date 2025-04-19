@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  postgres:
+    container_name: store_postgres
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=arash2007mahdavi
+      - POSTGRES_PASSWORD=arash2007
+      - POSTGRES_DB=store_database
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - store_network
+    restart: always
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: store_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: arashmahdavi2007@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: arash2007
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+    networks:
+      - store_network
+    restart: unless-stopped
+    depends_on:
+    - postgres
+  redis:
+    image: redis:latest
+    container_name: store_redis
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    volumes:
+      - ./redis/redis.conf:/etc/redis/redis.conf
+      - redis:/etc/redis
+    ports:
+      - "6379:6379"
+    networks:
+      - store_network
+    
+
+volumes:
+  postgres:
+  pgadmin:
+  redis:
+
+
+networks:
+  store_network:
+   driver: bridge
