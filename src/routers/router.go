@@ -13,6 +13,8 @@ func Store(router *gin.RouterGroup) {
 	
 	profile := router.Group("/profile")
 	{
+		profile.GET("/get/token", helper.GetToken)
+		profile.GET("/validate/token", helper.ValidateToken)
 		profile.POST("/new", middlewares.CheckApiKey, helper.ProfileNew)
 		profile.POST("/otp", middlewares.CheckApiKey, helper.CheckOtp)
 		profile.GET("/see", middlewares.CheckApiKey, helper.ProfileSee)

@@ -14,7 +14,7 @@ type TokenService struct {
 	cfg    *configs.Config
 }
 
-type tokenDto struct {
+type TokenDto struct {
 	UserId       int
 	FirstName    string
 	LastName     string
@@ -39,22 +39,22 @@ type TokenDetail struct {
 	RefreshTokenExpireTime int    `json:"refreshTokenExpireTime"`
 }
 
-func (s *TokenService) GenerateToken(token *tokenDto) (*TokenDetail, error) {
+func (s *TokenService) GenerateToken(token *TokenDto) (*TokenDetail, error) {
 	accessToken := &TokenDetail{}
 	accessToken.AccessTokenExpireTime = int(time.Now().Add(s.cfg.Jwt.AccessTokenExpireDuration * time.Minute).Unix())
 	accessToken.RefreshTokenExpireTime = int(time.Now().Add(s.cfg.Jwt.RefreshTokenExpireDuration * time.Minute).Unix())
 
-	accessTokenClaims := jwt.MapClaims{}
-	accessTokenClaims["user_id"] = token.UserId
-	accessTokenClaims["first_name"] = token.FirstName
-	accessTokenClaims["last_name"] = token.LastName
-	accessTokenClaims["username"] = token.Username
-	accessTokenClaims["email"] = token.Email
-	accessTokenClaims["mobileNumber"] = token.MobileNumber
-	accessTokenClaims["roles"] = token.Roles
-	accessTokenClaims["exp"] = accessToken.AccessTokenExpireTime
+	atc := jwt.MapClaims{}
+	atc["user_id"] = token.UserId
+	atc["first_name"] = token.FirstName
+	atc["last_name"] = token.LastName
+	atc["username"] = token.Username
+	atc["email"] = token.Email
+	atc["mobileNumber"] = token.MobileNumber
+	atc["roles"] = token.Roles
+	atc["exp"] = accessToken.AccessTokenExpireTime
 
-	at := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atc)
 	var err error
 	accessToken.AccessToken, err = at.SignedString([]byte(s.cfg.Jwt.Secret))
 	if err != nil {
@@ -78,7 +78,7 @@ func (s *TokenService) VerifyToken(token string) (*jwt.Token, error) {
 	at, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
-			return nil, fmt.Errorf("verify token")
+			return nil, fmt.Errorf("error in verify token")
 		}
 		return []byte(s.cfg.Jwt.Secret), nil
 	})

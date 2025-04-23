@@ -45,11 +45,11 @@ func (s *OtpService) ValidateOtp(mobileNumber string, otp string) error {
 	res, err := database.Get[OtpDto](mobileNumber)
 	if err != nil {
 		return err
-	} else if err == nil && res.Used {
+	} else if res.Used {
 		return fmt.Errorf("otp used")
-	} else if err == nil && !res.Used && res.Value != otp {
+	} else if !res.Used && res.Value != otp {
 		return fmt.Errorf("invalid otp")
-	} else if err == nil && !res.Used && res.Value == otp {
+	} else if !res.Used && res.Value == otp {
 		res.Used = true
 		err = database.Set(mobileNumber, res, s.cfg.Otp.Expire * time.Second)
 		if err != nil {

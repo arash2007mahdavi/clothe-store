@@ -304,3 +304,34 @@ func (h Helper) BuyClothe(c *gin.Context) {
 	}
 	c.AbortWithStatusJSON(http.StatusLocked, responses.MakeResponseWithError(false, http.StatusLocked, fmt.Errorf("this id doesnt exist")))
 }
+
+func (h *Helper) GetToken(c *gin.Context) {
+	sample := services.TokenDto{
+		UserId: 143343,
+		FirstName: "arash",
+		LastName: "mahdavi",
+		Username: "arash2007mahdavi",
+		MobileNumber: "099450929680",
+		Email: "arash@gmail.com",
+		Roles: []string{"salam", "hello"},
+	}
+	service := services.NewTokenService(configs.GetConfig())
+	res, err :=service.GenerateToken(&sample)
+	if err != nil {
+		panic(err)
+	}
+	c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, res))
+}
+
+func (h *Helper) ValidateToken(c *gin.Context) {
+	token, ok := c.GetQuery("token")
+	if !ok {
+		panic(fmt.Errorf("hello"))
+	}
+	service := services.NewTokenService(configs.GetConfig())
+	res, err := service.VerifyToken(token)
+	if err != nil {
+		panic(err)
+	}
+	c.JSON(http.StatusOK, responses.MakeNormalResponse(true, http.StatusOK, res))
+}
