@@ -37,3 +37,7 @@
 {"level":"fatal","AppName":"Store","LoggerName":"Zerolog","Category":"Postgres","SubCategory":"Startup","time":"2025-04-20T18:04:15+03:30","message":"failed in start database"}
 {"level":"info","AppName":"Store","LoggerName":"Zerolog","Category":"General","SubCategory":"Startup","time":"2025-04-20T18:07:40+03:30","message":"server started"}
 {"level":"info","AppName":"Store","LoggerName":"Zerolog","Category":"General","SubCategory":"Startup","time":"2025-04-20T18:16:43+03:30","message":"server started"}
+{"level":"info","AppName":"Store","LoggerName":"Zerolog","Category":"General","SubCategory":"Startup","time":"2025-04-26T16:38:59+03:30","message":"server started"}
+{"level":"info","AppName":"Store","LoggerName":"Zerolog","Category":"General","SubCategory":"Startup","time":"2025-04-26T16:43:06+03:30","message":"server started"}
+{"level":"info","AppName":"Store","LoggerName":"Zerolog","Category":"General","SubCategory":"Startup","time":"2025-04-26T16:45:39+03:30","message":"server started"}
+{"level":"info","AppName":"Store","LoggerName":"Zerolog","Category":"General","SubCategory":"Startup","time":"2025-04-26T16:48:13+03:30","message":"server started"}

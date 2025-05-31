@@ -28,6 +28,4 @@ func Up_1() {
 	}
 
 	database.Migrator().CreateTable(tables...)
-	samplehat := &models.Hat{Price: 950.0, Currency: "toman"}
-	database.Create(samplehat)
 }
